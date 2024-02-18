@@ -17,9 +17,9 @@ async def get_code_from_gamesrader() -> List[str]:
             json_content = await response.text()
             soup = BeautifulSoup(json_content, "html.parser")
             lis = soup.select(
-                ".article .text-copy b, .article .text-copy strong, .news-article .text-copy b, .news-article .text-copy strong, .review-article .text-copy b, .review-article .text-copy strong, .static-article .text-copy b, .static-article .text-copy strong"
+                ".article .text-copy b, .article .text-copy strong, .news-article .text-copy b, .news-article .text-copy strong, .review-article .text-copy b, .review-article .text-copy strong, .static-article .text-copy b, .static-article .text-copy strong" # noqa
             )
-            codes = [li.text.strip() for li in lis if li.text.strip().isupper()]
+            codes = [li.text.strip() for li in lis if li.text.strip().isupper()] # noqa
     except Exception as e:
         print(f"Error in get_code_from_gamesrader: {e}")
         return []
@@ -38,7 +38,7 @@ async def get_code_from_programguide() -> List[str]:
         lis = soup.select("div.entry-content li:not(:has(a)):has(strong)")
 
         codes = [
-            li.strong.text.strip() for li in lis if li.strong.text.strip().isupper()
+            li.strong.text.strip() for li in lis if li.strong.text.strip().isupper() # noqa
         ]
 
     except Exception as e:
@@ -50,7 +50,7 @@ async def get_code_from_programguide() -> List[str]:
 
 async def get_code_from_gipn() -> List[str]:
     async with aiohttp.ClientSession() as session, session.get(
-        "https://raw.githubusercontent.com/ataraxyaffliction/gipn-json/main/gipn-update.json"
+        "https://raw.githubusercontent.com/ataraxyaffliction/gipn-json/main/gipn-update.json" # noqa
     ) as response:
         json_content = await response.text()
         json_content = json.loads(json_content)
@@ -81,7 +81,7 @@ async def get_code_from_pockettactics() -> List[dict]:
             code = entry.get_text().strip()
             if code and code == code.upper():
                 description = (
-                    entry.parent.get_text().split("–")[1].replace("(new!)", "").strip()
+                    entry.parent.get_text().split("–")[1].replace("(new!)", "").strip() # noqa
                 )
                 codes.append({"code": code, "description": description})
 
@@ -96,7 +96,7 @@ async def get_code_from_eurogamer() -> List[dict]:
     codes = []
     try:
         async with aiohttp.ClientSession() as session, session.get(
-            "https://www.eurogamer.net/genshin-impact-codes-livestream-active-working-how-to-redeem-9026"
+            "https://www.eurogamer.net/genshin-impact-codes-livestream-active-working-how-to-redeem-9026" # noqa
         ) as response:
             html = await response.text()
 
@@ -107,8 +107,9 @@ async def get_code_from_eurogamer() -> List[dict]:
             code_element = entry.find("strong")
             if code_element:
                 code = code_element.get_text().strip()
-                description = entry.get_text(separator=' ').replace(code, '').strip()
+                description = entry.get_text(separator=' ').replace(code, '').strip() # noqa
                 if code == code.upper():
+                    description = description.lstrip(': - ')
                     codes.append({"code": code, "description": description})
 
     except Exception as e:
@@ -121,13 +122,13 @@ async def get_code_from_eurogamer() -> List[dict]:
 @app.get("/")
 async def root():
     return {
-        "message": "Welcome to the Genshin Impact redeem code API! Please visit /codes for codes."
+        "message": "Welcome to the Genshin Impact redeem code API! Please visit /codes for codes." # noqa
     }
 
 
 @app.get("/codes")
 async def read_codes() -> List[dict]:
-    pocket_codes, program_codes, gipn, games_radar, euro_gamer = await asyncio.gather(
+    pocket_codes, program_codes, gipn, games_radar, euro_gamer = await asyncio.gather( # noqa
         get_code_from_pockettactics(),
         get_code_from_programguide(),
         get_code_from_gipn(),

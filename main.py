@@ -128,26 +128,28 @@ async def root():
 
 @app.get("/codes")
 async def read_codes() -> List[dict]:
-    pocket_codes, program_codes, gipn, games_radar, euro_gamer = await asyncio.gather( # noqa
+    pocket_codes, program_codes, gipn, games_radar, euro_gamer = await asyncio.gather(
         get_code_from_pockettactics(),
         get_code_from_programguide(),
         get_code_from_gipn(),
         get_code_from_gamesrader(),
         get_code_from_eurogamer(),
     )
+
     old_codes = ["GENSHINGIFT", "XBRSDNF6BP4R", "FTRUFT7AT5SV"]
-    new_codes = [code for code in gipn if code["code"] not in old_codes]
+
+    all_codes = gipn + pocket_codes + program_codes + games_radar + euro_gamer
+    unique_codes = {code["code"]: code for code in all_codes}.values()
+
     filtered_codes = [
         code
-        for code in new_codes
-        if code["code"] in pocket_codes
-        and code["code"] in program_codes
-        and code["code"] in games_radar
-        and code["code"] in euro_gamer
+        for code in unique_codes
+        if code["code"] not in old_codes
     ]
+
     if len(filtered_codes) == 0:
-        return new_codes
-    return filtered_codes
+        return all_codes
+    return list(filtered_codes)
 
 
 if __name__ == "__main__":
